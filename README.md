@@ -101,3 +101,24 @@ With the Visual Studio generator, run:
 3. **No route:** create a complete vertical wall in column 15. Both algorithms should report that no path exists.
 
 Run both algorithms on the same maze when comparing their visited-cell counts and path lengths. The result panel retains each algorithm's metrics until the maze is edited or Reset Search is selected. Record the actual values from the application during testing; results depend on maze layout and neighbor order.
+
+## Automated algorithm tests
+
+A small C test program checks both algorithms against the open-grid, detour, and no-route cases. It also verifies that each reported path follows adjacent cells, avoids walls, and has a consistent move count. Reset behaviour is checked as well.
+
+After configuring the project, build and run the tests with:
+
+    cmake --build build --target MazeSolverTests -j4
+    ctest --test-dir build --output-on-failure
+
+The test executable uses only the maze and solver source files; it does not need to open the GUI.
+
+Sample results with the current neighbor order (up, right, down, left):
+
+| Maze | BFS | DFS |
+|---|---:|---:|
+| Open grid | 28 moves, 530 visited | 164 moves, 318 visited |
+| Detour | 48 moves, 575 visited | 108 moves, 205 visited |
+| No route | No path, 315 visited | No path, 315 visited |
+
+These are observed counts for the current implementation and traversal order, not universal properties of the algorithms.

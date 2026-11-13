@@ -28,3 +28,16 @@ add_executable(MazeSolver
 
 target_include_directories(MazeSolver PRIVATE include)
 target_link_libraries(MazeSolver PRIVATE raylib)
+
+# The algorithm tests are a small console target and do not depend on Raylib.
+include(CTest)
+if(BUILD_TESTING)
+    add_executable(MazeSolverTests
+        tests/test_solvers.c
+        src/maze.c
+        src/bfs.c
+        src/dfs.c
+    )
+    target_include_directories(MazeSolverTests PRIVATE include)
+    add_test(NAME MazeSolverAlgorithms COMMAND MazeSolverTests)
+endif()
