@@ -118,13 +118,13 @@ void BFSStep(BFSState *state, const Maze *maze) {
 
         if (!IsInsideMaze(nextRow, nextCol) ||
             maze->cells[nextRow][nextCol] == CELL_WALL ||
-            state->visited[nnextRow][nextCol]) {
+            state->visited[nextRow][nextCol]) {
             continue;
         }
 
-        state->visited[nnextRow][nextCol] = true;
+        state->visited[nextRow][nextCol] = true;
         state->parent[nextRow][nextCol] = current;
-        state->queue[state->rear+-+] = (BFSPosition){nextRow, nextCol};
+        state->queue[state->rear++] = (BFSPosition){nextRow, nextCol};
         state->visitedCount++;
     }
 
