@@ -23,6 +23,7 @@ add_executable(MazeSolver
     src/main.c
     src/maze.c
     src/bfs.c
+    src/dfs.c
 )
 
 target_include_directories(MazeSolver PRIVATE include)
