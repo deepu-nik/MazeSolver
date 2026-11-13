@@ -12,6 +12,7 @@ A small cross-platform desktop application written in C with Raylib. It demonstr
 - Step-by-step visualization of discovered cells
 - Parent tracking and path reconstruction
 - Visited-cell count and path-length display
+- Side-by-side BFS and DFS result metrics for the same maze
 - Reset Search and Clear Walls controls
 
 The project intentionally stays small for a DAA minor project. A* search, weighted terrain, automatic maze generation, and save/load are outside the current scope.
@@ -88,7 +89,7 @@ With the Visual Studio generator, run:
 
 - **Solve using BFS**: run BFS and animate the search. BFS returns a shortest path in the unweighted grid.
 - **Solve using DFS**: run DFS and animate the search. The path found is not guaranteed to be shortest.
-- **Reset Search**: clear visited cells and the displayed path without changing walls.
+- **Reset Search**: clear both algorithms' results without changing walls.
 - **Clear Walls**: remove all walls and clear the search result.
 - **Grid click**: add or remove a wall; previous search results are reset.
 - **Esc**: close the application.
@@ -99,4 +100,4 @@ With the Visual Studio generator, run:
 2. **Detour required:** create a vertical wall in column 15, leaving only the bottom-row cell open. BFS should find a 48-move path. DFS should find a valid route, which may be longer.
 3. **No route:** create a complete vertical wall in column 15. Both algorithms should report that no path exists.
 
-Run both algorithms on the same maze when comparing their visited-cell counts and path lengths. Record the actual values from the application during testing; results depend on maze layout and neighbor order.
+Run both algorithms on the same maze when comparing their visited-cell counts and path lengths. The result panel retains each algorithm's metrics until the maze is edited or Reset Search is selected. Record the actual values from the application during testing; results depend on maze layout and neighbor order.

@@ -197,7 +197,6 @@ int main(void) {
 
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
             if (CheckCollisionPointRec(mouse, bfsButton)) {
-                DFSReset(&dfs);
                 BFSInit(&bfs, &maze);
                 activeSearch = SEARCH_BFS;
                 stepTimer = 0.0f;
@@ -209,7 +208,6 @@ int main(void) {
                     UpdateBFSStatus(status, sizeof(status), &bfs);
                 }
             } else if (CheckCollisionPointRec(mouse, dfsButton)) {
-                BFSReset(&bfs);
                 DFSInit(&dfs, &maze);
                 activeSearch = SEARCH_DFS;
                 stepTimer = 0.0f;
@@ -284,38 +282,38 @@ int main(void) {
                  MazeCountWalls(&maze));
         DrawText(wallText, 820, 628, 15, COLOR_TEXT);
 
-        if (activeSearch == SEARCH_BFS) {
-            if (bfs.status == BFS_STATUS_FOUND) {
-                snprintf(resultText, sizeof(resultText),
-                         "BFS: %d visited | %d moves",
-                         bfs.visitedCount, bfs.pathLength);
-            } else if (bfs.status == BFS_STATUS_NO_PATH) {
-                snprintf(resultText, sizeof(resultText),
-                         "BFS: no path | %d visited", bfs.visitedCount);
-            } else {
-                snprintf(resultText, sizeof(resultText),
-                         "BFS (Queue): %d visited", bfs.visitedCount);
-            }
-            DrawText(resultText, 820, 650, 14, COLOR_MUTED);
-        } else if (activeSearch == SEARCH_DFS) {
-            if (dfs.status == DFS_STATUS_FOUND) {
-                snprintf(resultText, sizeof(resultText),
-                         "DFS: %d visited | %d moves",
-                         dfs.visitedCount, dfs.pathLength);
-            } else if (dfs.status == DFS_STATUS_NO_PATH) {
-                snprintf(resultText, sizeof(resultText),
-                         "DFS: no path | %d visited", dfs.visitedCount);
-            } else {
-                snprintf(resultText, sizeof(resultText),
-                         "DFS (Stack): %d visited", dfs.visitedCount);
-            }
-            DrawText(resultText, 820, 650, 14, COLOR_MUTED);
+        if (bfs.status == BFS_STATUS_FOUND) {
+            snprintf(resultText, sizeof(resultText),
+                     "BFS: %d visited | %d moves",
+                     bfs.visitedCount, bfs.pathLength);
+        } else if (bfs.status == BFS_STATUS_NO_PATH) {
+            snprintf(resultText, sizeof(resultText),
+                     "BFS: no path | %d visited", bfs.visitedCount);
+        } else if (bfs.status == BFS_STATUS_RUNNING) {
+            snprintf(resultText, sizeof(resultText),
+                     "BFS: searching | %d visited", bfs.visitedCount);
         } else {
-            DrawText("Choose BFS or DFS to solve.", 820, 650, 14, COLOR_MUTED);
+            snprintf(resultText, sizeof(resultText), "BFS: not run");
         }
+        DrawText(resultText, 820, 648, 13, COLOR_MUTED);
 
-        DrawText(status, 40, 683, 13, COLOR_MUTED);
-        DrawText("ESC: Exit", 980, 683, 14, COLOR_MUTED);
+        if (dfs.status == DFS_STATUS_FOUND) {
+            snprintf(resultText, sizeof(resultText),
+                     "DFS: %d visited | %d moves",
+                     dfs.visitedCount, dfs.pathLength);
+        } else if (dfs.status == DFS_STATUS_NO_PATH) {
+            snprintf(resultText, sizeof(resultText),
+                     "DFS: no path | %d visited", dfs.visitedCount);
+        } else if (dfs.status == DFS_STATUS_RUNNING) {
+            snprintf(resultText, sizeof(resultText),
+                     "DFS: searching | %d visited", dfs.visitedCount);
+        } else {
+            snprintf(resultText, sizeof(resultText), "DFS: not run");
+        }
+        DrawText(resultText, 820, 668, 13, COLOR_MUTED);
+
+        DrawText(status, 40, 704, 13, COLOR_MUTED);
+        DrawText("ESC: Exit", 980, 704, 14, COLOR_MUTED);
 
         EndDrawing();
     }
