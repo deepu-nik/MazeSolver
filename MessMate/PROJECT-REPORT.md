@@ -18,7 +18,7 @@ FCFS serves in arrival order. A flexible student may take a slot that is the onl
 ## 4. DAA Strategy
 **Graph Algorithms — Maximum Bipartite Matching.** Left vertices represent students; right vertices represent discrete service start slots. Add an edge only when the complete service interval fits in that student's availability. An augmenting-path DFS finds a maximum-cardinality matching.
 
-Assumptions: one counter, common fixed service duration, discrete time grid, maximum 100 students and 200 slots in this implementation. The solution is exact for this discretized model, not arbitrary continuous-time scheduling or different service durations.
+Assumptions: one counter, common fixed service duration of 10 minutes, service starts every 5 minutes between 11:30 and 14:00, up to 100 students and 200 slots. The solution is exact for this discretized model, not arbitrary continuous-time scheduling or different service durations.
 
 ## 5. Pseudocode
 ```text
@@ -40,7 +40,7 @@ Return matched assignments and unserved students
 ## 6. Flowchart
 ```mermaid
 flowchart TD
- A([Start]) --> B[Enter student windows and counter settings]
+ A([Start]) --> B[Enter student windows]
  B --> C[Generate discrete service slots]
  C --> D[Build student-slot graph]
  D --> E[Run augmenting-path DFS for each student]
@@ -60,16 +60,16 @@ flowchart TD
 - Build: Makefile; Clang on macOS or MinGW-w64/MSYS2 GCC on Windows.
 
 ## 8. Complexity Analysis
-Let (n) be students, (s) service slots, (V=n+s), and (E) feasible student-slot edges. The augmenting-path algorithm has worst-case **O(VE)** time; graph storage is **O(V+E)**. Building the adjacency matrix is **O(ns)** time and the implementation's fixed adjacency storage is **O(ns)** space. The DFS recursion depth is bounded by the number of slots.
+Let (n) be students, (s) service slots, (V=n+s), and (E) feasible student-slot edges. The augmenting-path algorithm has worst-case **O(VE)** time; graph storage is **O(V+E)**. Building the adjacency matrix is **O(ns)** time and the implementation's fixed adjacency storage is **O(ns)** space. DFS recursion depth is bounded by the number of slots.
 
 ## 9. Testing and Results
 Run `make test` in MessMate. Paste actual compiler/test output and add screenshots of the student list, optimized schedule and FCFS comparison.
 
 ## 10. Comparison
-Use a flexible student and a constrained student to demonstrate reassignment: FCFS may consume the constrained student's only slot, while matching finds two assignments. Report the actual output from the test program.
+Use a flexible student and a constrained student to demonstrate reassignment: FCFS may consume the constrained student's only slot, while matching finds two assignments. Report actual output from the test program.
 
 ## 11. Conclusion and Future Scope
-MessMate models counter allocation as bipartite matching. Future scope: multiple counters, variable service durations, multiple meal counters, saved schedules and continuous-time models.
+MessMate models counter allocation as bipartite matching. Future scope: multiple counters, variable service durations, meal categories and saved schedules.
 
 ## 12. References
 - Course notes/textbook: [Add exact reference]
