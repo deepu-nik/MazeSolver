@@ -56,7 +56,7 @@ flowchart TD
 - Tests: `tests/test_optimizer.c`
 - Build: Makefile; Clang on macOS or MinGW-w64/MSYS2 GCC on Windows.
 - Brute-force comparison is limited to 22 attractions.
-- GUI defaults: 480 minutes and ₹3,000; these are constants in the current version.
+- GUI inputs: editable time limit (minutes) and budget limit (₹).
 
 ## 8. Complexity Analysis
 Let (n) be attractions, (T) the time limit and (B) the budget limit in integer units. Dense two-dimensional DP has **O(nTB)** worst-case time and **O(TB)** space. The implementation stores a fixed-size score, reachability flag and 64-bit selection mask per state, so the asymptotic space remains O(TB). The implementation caps the table at 2 million cells. Brute force is **O(n·2^n)** time and O(1) auxiliary space apart from its result structure.
