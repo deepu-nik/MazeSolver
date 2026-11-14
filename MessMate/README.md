@@ -1,30 +1,33 @@
-# MessMate — College Mess Meal Scheduler
+# MessMate — College Mess Meal Scheduler (C + Raylib)
 
-A Python/Tkinter desktop GUI that schedules the maximum possible number of students at one serving counter within their personal meal-availability windows.
+A GUI-based C application that assigns students to fixed service slots and maximizes the number served within their personal availability windows.
 
 ## DAA strategy
-The application uses **maximum bipartite matching (Graph Algorithms)**. Time is divided into configurable fixed-length service slots. A student is adjacent to a slot only if the complete service interval fits inside that student's availability window. An augmenting-path matcher finds a maximum-cardinality matching.
+**Graph Algorithms — Maximum Bipartite Matching.** Students form the left vertex set and feasible counter time slots form the right vertex set. An edge exists only if the complete service interval fits inside the student's availability window. An augmenting-path DFS computes a maximum-cardinality matching.
 
-This is exact for the discretized-slot model implemented here. It assumes one counter, a common fixed service duration, and service starts on the selected slot grid. It does not claim to solve arbitrary continuous-time scheduling or different service durations.
+## Model assumptions
+- One serving counter.
+- All students require a common fixed service duration of 10 minutes.
+- Service starts are considered every 5 minutes between 11:30 and 14:00.
+- A complete 10-minute service interval must fit inside the student's availability window.
+- The algorithm is exact for this discretized model, not arbitrary continuous-time scheduling or varying service durations.
+- Implementation limits: 100 students and 200 service slots.
 
-## Run
-Python 3.10+ recommended. Tkinter is included with most standard Python installations.
+## Build
+Requirements: C compiler (Clang on macOS; MinGW-w64/MSYS2 GCC on Windows), Raylib 5.x and Make.
 
-macOS / Windows:
+macOS: `brew install raylib pkg-config`
+Windows: install Raylib and configure compiler include/library paths.
+
 ```bash
-cd MessMate
-python app.py
-```
-On some macOS installations use `python3 app.py`.
+make
+./messmate
+``
+Windows: `mingw32-make` then `messmate.exe`.
 
-## Tests
+Run algorithm tests without Raylib:
 ```bash
-python -m unittest discover -s tests -v
-```
+make test
+``
 
-## Included
-- Add/remove student availability windows
-- Configurable opening/closing time, service duration and slot interval
-- Optimized schedule and unserved list
-- FCFS baseline comparison
-- Sample dataset and input validation
+The GUI supports adding a student, loading sample records, removing the last record, optimizing and clearing the list. Click a text field to type; TAB changes the active field.
