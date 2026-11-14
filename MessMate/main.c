@@ -16,7 +16,7 @@ static void add_student(void){int a=parse_time(frombuf),b=parse_time(untilbuf);i
 static void load_sample(void){const char *names[]={"Aarav","Diya","Kabir","Mira","Rohan","Sara","Ishaan"};const char *a[]={"11:30","11:30","12:00","12:00","12:30","11:45","12:15"};const char *b[]={"12:00","12:30","12:30","13:00","13:00","12:15","13:15"};n=7;for(int i=0;i<n;i++){strcpy(students[i].name,names[i]);students[i].from_min=parse_time(a[i]);students[i].until_min=parse_time(b[i]);students[i].arrival_order=i;}has_result=0;strcpy(msg,"Sample dataset loaded.");}
 int main(void){SetConfigFlags(FLAG_WINDOW_RESIZABLE);InitWindow(W,H,"MessMate | College Mess Scheduler");SetTargetFPS(60);
 while(!WindowShouldClose()){
- if(IsKeyPressed(KEY_TAB))focus=(focus+1)%3;
+ if(IsMouseButtonPressed(MOUSE_LEFT_BUTTON)){Vector2 mp=GetMousePosition();if(CheckCollisionPointRec(mp,(Rectangle){32,174,235,38}))focus=0;else if(CheckCollisionPointRec(mp,(Rectangle){285,174,210,38}))focus=1;else if(CheckCollisionPointRec(mp,(Rectangle){510,174,210,38}))focus=2;}if(IsKeyPressed(KEY_TAB))focus=(focus+1)%3;
  if(IsKeyPressed(KEY_BACKSPACE)){char *p=focus==0?namebuf:focus==1?frombuf:untilbuf;size_t l=strlen(p);if(l)p[l-1]=0;}
  int ch=GetCharPressed();while(ch>0){if(ch>=32&&ch<127){char *p=focus==0?namebuf:focus==1?frombuf:untilbuf;int max=focus==0?63:7;size_t l=strlen(p);if((int)l<max){p[l]=(char)ch;p[l+1]=0;}}ch=GetCharPressed();}
  if(button((Rectangle){850,110,180,42},"Add student"))add_student();
