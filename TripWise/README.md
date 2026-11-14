@@ -29,4 +29,4 @@ Run algorithm tests without Raylib:
 make test
 ``
 
-The GUI currently uses default trip limits of 480 minutes and ₹3,000. Use the sample dataset or add attractions; the optimizer returns a best selection under both limits.
+The GUI lets the user edit available time (minutes) and budget (₹) before optimizing.
