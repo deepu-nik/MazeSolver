@@ -1,23 +1,25 @@
-# TripWise — Tourist Attraction Planner
+# TripWise — Tourist Attraction Planner (C + Raylib)
 
-A Python/Tkinter desktop application that selects attractions with the maximum total rating under both a time limit and a budget limit.
+A GUI-based C application that selects attractions maximizing total rating while satisfying both a time limit and a budget limit.
 
 ## DAA strategy
-**Dynamic Programming: 0/1 Knapsack with two constraints.** Each attraction can be selected at most once. The DP tracks reachable (used-time, used-budget) states and the best rating for each state. A brute-force subset enumeration is included as a validation baseline for up to 22 attractions.
+**Dynamic Programming — 0/1 Knapsack with two constraints.** The DP state is indexed by used time and used budget. Each attraction is considered once, with descending resource iteration. Brute-force subset enumeration validates small inputs (up to 22 attractions).
 
-The model assumes additive ratings and independent attractions. Travel time, route order, opening hours and subjective rating interactions are outside the current model.
+The implementation supports up to 40 attractions, time limits up to 2,000 minutes, budget limits up to ₹200,000, and caps the DP table at 12 million cells. Ratings are additive; attractions are independent. Travel time, route order and opening hours are not modelled.
 
-## Run
-Python 3.10+ recommended. Tkinter is included with most standard Python installations.
+## Build
+Requirements: C compiler (Clang on macOS; MinGW-w64/MSYS2 GCC on Windows), Raylib 5.x, and Make.
 
-macOS / Windows:
+macOS: `brew install raylib pkg-config`
+Windows: install Raylib and configure compiler include/library paths.
+
 ```bash
-cd TripWise
-python app.py
-```
-On some macOS installations use `python3 app.py`.
+make
+./tripwise
+``
+Windows: `mingw32-make` then `tripwise.exe`.
 
-## Tests
+Run algorithm tests without Raylib:
 ```bash
-python -m unittest discover -s tests -v
-```
+make test
+``
