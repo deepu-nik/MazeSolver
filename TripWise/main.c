@@ -2,28 +2,45 @@
 #include "optimizer.h"
 #include <stdio.h>
 #include <string.h>
-#define W 1100
-#define H 760
+#define W 1280
+#define H 900
+static const Color BG={239,244,249,255},NAVY={24,43,68,255},INK={35,51,70,255},MUTED={101,119,139,255},BLUE={47,105,173,255},PALE={226,236,247,255},WHITE={255,255,255,255},GREEN={28,132,93,255},AMBER={183,116,31,255},LINE={214,224,234,255};
 static Attraction items[TW_MAX_ITEMS];static int n=0,T=480,B=3000;static char namebuf[64]="",dur[12]="60",cost[12]="200",rating[12]="5",tbuf[12]="480",bbuf[12]="3000",status[256]="Add attractions or load the sample dataset.";static int focus=0,has=0;static Plan plan,brute;
-static void add(void){int d,c,r;if(!namebuf[0]||sscanf(dur,"%d",&d)!=1||sscanf(cost,"%d",&c)!=1||sscanf(rating,"%d",&r)!=1||d<=0||c<0||r<0||n>=TW_MAX_ITEMS){strcpy(status,"Invalid data: duration > 0, cost/rating >= 0, max 40.");return;}for(int i=0;i<n;i++)if(!strcmp(items[i].name,namebuf)){strcpy(status,"Attraction names must be unique.");return;}strncpy(items[n].name,namebuf,63);items[n].duration=d;items[n].cost=c;items[n].rating=r;n++;namebuf[0]=0;has=0;strcpy(status,"Attraction added.");}
-static void sample(void){const char *names[]={"Fort","Museum","Garden","Aquarium","Temple","Science Centre","Lake Boating","Art Gallery"};int d[]={120,90,60,120,45,150,60,75},c[]={500,200,100,700,0,350,300,250},r[]={9,7,6,9,6,8,7,7};n=8;for(int i=0;i<n;i++){strcpy(items[i].name,names[i]);items[i].duration=d[i];items[i].cost=c[i];items[i].rating=r[i];}has=0;strcpy(status,"Sample attractions loaded.");}
-static int btn(Rectangle r,const char *s){DrawRectangleRounded(r,.16f,8,CheckCollisionPointRec(GetMousePosition(),r)?(Color){65,110,175,255}:(Color){43,76,125,255});DrawText(s,r.x+12,r.y+10,18,RAYWHITE);return IsMouseButtonPressed(MOUSE_LEFT_BUTTON)&&CheckCollisionPointRec(GetMousePosition(),r);}
+static int hit(Rectangle r){return IsMouseButtonPressed(MOUSE_LEFT_BUTTON)&&CheckCollisionPointRec(GetMousePosition(),r);}
+static void label(const char*s,int x,int y,int size,Color c){DrawText(s,x,y,size,c);}
+static void panel(Rectangle r){DrawRectangleRounded(r,.08f,12,WHITE);DrawRectangleRoundedLines(r,.08f,12,LINE);}
+static void button(Rectangle r,const char*s,int primary){Color c=CheckCollisionPointRec(GetMousePosition(),r)?(Color){63,119,184,255}:(primary?BLUE:PALE);DrawRectangleRounded(r,.18f,10,c);label(s,(int)r.x+16,(int)r.y+13,19,primary?WHITE:NAVY);}
+static int btn(Rectangle r,const char*s,int primary){button(r,s,primary);return hit(r);}
+static void field(Rectangle r,const char*title,const char*value,int active){label(title,(int)r.x,(int)r.y-29,17,MUTED);DrawRectangleRounded(r,.12f,8,WHITE);DrawRectangleRoundedLines(r,.12f,8,active?BLUE:LINE);label(value,(int)r.x+13,(int)r.y+12,21,INK);}
+static void add(void){int d,c,r;if(!namebuf[0]||sscanf(dur,"%d",&d)!=1||sscanf(cost,"%d",&c)!=1||sscanf(rating,"%d",&r)!=1||d<=0||c<0||r<0||n>=TW_MAX_ITEMS){strcpy(status,"Invalid data: duration > 0, cost/rating >= 0, maximum 40.");return;}for(int i=0;i<n;i++)if(!strcmp(items[i].name,namebuf)){strcpy(status,"Attraction names must be unique.");return;}strncpy(items[n].name,namebuf,63);items[n].duration=d;items[n].cost=c;items[n].rating=r;n++;namebuf[0]=0;has=0;strcpy(status,"Attraction added successfully.");}
+static void sample(void){const char*names[]={"Fort","Museum","Garden","Aquarium","Temple","Science Centre","Lake Boating","Art Gallery"};int d[]={120,90,60,120,45,150,60,75},c[]={500,200,100,700,0,350,300,250},r[]={9,7,6,9,6,8,7,7};n=8;for(int i=0;i<n;i++){strcpy(items[i].name,names[i]);items[i].duration=d[i];items[i].cost=c[i];items[i].rating=r[i];}has=0;strcpy(status,"Sample attractions loaded.");}
 int main(void){SetConfigFlags(FLAG_WINDOW_RESIZABLE);InitWindow(W,H,"TripWise | Tourist Attraction Planner");SetTargetFPS(60);
 while(!WindowShouldClose()){
- if(IsKeyPressed(KEY_TAB))focus=(focus+1)%6;if(IsKeyPressed(KEY_BACKSPACE)){char *fields[]={namebuf,dur,cost,rating,tbuf,bbuf};char *p=fields[focus];size_t l=strlen(p);if(l)p[l-1]=0;}
- int ch=GetCharPressed();while(ch>0){if(ch>=32&&ch<127){char *fields[]={namebuf,dur,cost,rating,tbuf,bbuf};char *p=fields[focus];int max=focus==0?63:11;size_t l=strlen(p);if((int)l<max){p[l]=ch;p[l+1]=0;}}ch=GetCharPressed();}
- if(btn((Rectangle){850,110,180,42},"Add attraction"))add();if(btn((Rectangle){850,160,180,42},"Load sample"))sample();if(btn((Rectangle){850,210,180,42},"Remove last")&&n){n--;has=0;strcpy(status,"Last attraction removed.");}
- if(btn((Rectangle){850,260,180,42},"Optimize")){int parsedT=0,parsedB=0;if(sscanf(tbuf,"%d",&parsedT)!=1||sscanf(bbuf,"%d",&parsedB)!=1||parsedT<0||parsedB<0){strcpy(status,"Enter non-negative numeric time and budget limits.");}else{T=parsedT;B=parsedB;if(tw_optimize(items,n,T,B,&plan)){has=1;if(n<=22&&tw_bruteforce(items,n,T,B,&brute)&&brute.rating!=plan.rating)strcpy(status,"Warning: DP and brute force differ.");else strcpy(status,"Optimal selection calculated.");}else strcpy(status,"Invalid limits, data, or memory cap exceeded.");}}
- if(btn((Rectangle){850,310,180,42},"Clear all")){n=0;has=0;strcpy(status,"All attractions cleared.");}
- BeginDrawing();ClearBackground((Color){18,24,36,255});DrawText("TripWise",30,20,36,RAYWHITE);DrawText("Tourist Attraction Planner | C + Raylib",32,64,18,(Color){170,190,215,255});
- DrawText("ATTRACTION INPUT",32,112,18,(Color){130,190,255,255});const char *labels[]={"Attraction","Duration min","Entry cost Rs","Rating points"};char *fields[]={namebuf,dur,cost,rating};int xs[]={32,235,430,625},ws[]={180,170,170,170};
- for(int i=0;i<4;i++){DrawText(labels[i],xs[i],151,15,LIGHTGRAY);DrawRectangleLines(xs[i],174,ws[i],38,focus==i?SKYBLUE:GRAY);DrawText(fields[i],xs[i]+8,183,18,RAYWHITE);}
- DrawText("Click a field to type; TAB switches fields.",32,220,14,GRAY);DrawText(TextFormat("Attractions: %d / %d",n,TW_MAX_ITEMS),32,255,17,RAYWHITE);DrawText("YOUR LIMITS",32,290,18,(Color){130,190,255,255});
- DrawText(TextFormat("Available time: %d minutes",T),32,320,17,LIGHTGRAY);DrawText(TextFormat("Budget: Rs %d",B),350,320,17,LIGHTGRAY);
- DrawText("ATTRACTION LIST",32,390,18,(Color){130,190,255,255});DrawRectangle(32,418,770,130,(Color){28,37,53,255});
- for(int i=0;i<n&&i<6;i++)DrawText(TextFormat("%-18s %4d min   Rs %-5d   rating %d",items[i].name,items[i].duration,items[i].cost,items[i].rating),48,430+i*19,14,LIGHTGRAY);
- DrawText("OPTIMIZED PLAN",32,565,18,(Color){130,190,255,255});
- if(has){DrawText(TextFormat("Rating: %d   Time: %d/%d min   Budget: Rs %d/%d",plan.rating,plan.used_time,T,plan.used_budget,B),32,594,18,GREEN);for(int i=0;i<plan.count&&i<4;i++)DrawText(items[plan.selected[i]].name,48,622+i*22,15,RAYWHITE);if(n<=22)DrawText(TextFormat("Brute force rating: %d | DP matches: %s",brute.rating,brute.rating==plan.rating?"YES":"NO"),520,622,15,brute.rating==plan.rating?GREEN:RED);
- }else DrawText("Click Optimize to find the best combination under both limits.",32,600,16,GRAY);
- DrawText(status,32,H-34,16,(Color){220,205,140,255});EndDrawing();}
+ if(IsMouseButtonPressed(MOUSE_LEFT_BUTTON)){Vector2 p=GetMousePosition();Rectangle f[]={{40,235,220,54},{285,235,150,54},{460,235,170,54},{655,235,170,54},{40,360,220,54},{285,360,220,54}};for(int i=0;i<6;i++)if(CheckCollisionPointRec(p,f[i]))focus=i;}
+ if(IsKeyPressed(KEY_TAB))focus=(focus+1)%6;
+ char*fields[]={namebuf,dur,cost,rating,tbuf,bbuf};
+ if(IsKeyPressed(KEY_BACKSPACE)){size_t l=strlen(fields[focus]);if(l)fields[focus][l-1]=0;}
+ int ch=GetCharPressed();while(ch>0){if(ch>=32&&ch<127){char*p=fields[focus];int max=focus==0?63:11;size_t l=strlen(p);if((int)l<max){p[l]=(char)ch;p[l+1]=0;}}ch=GetCharPressed();}
+ if(btn((Rectangle){900,235,150,54},"Add attraction",1))add();
+ if(btn((Rectangle){1065,235,175,54},"Load sample",0))sample();
+ if(btn((Rectangle){900,305,150,48},"Remove last",0)&&n){n--;has=0;strcpy(status,"Last attraction removed.");}
+ if(btn((Rectangle){1065,305,175,48},"Clear all",0)){n=0;has=0;strcpy(status,"Attraction list cleared.");}
+ if(btn((Rectangle){900,369,340,54},"Optimize plan",1)){int pt=0,pb=0;if(sscanf(tbuf,"%d",&pt)!=1||sscanf(bbuf,"%d",&pb)!=1||pt<0||pb<0){strcpy(status,"Enter non-negative numeric time and budget limits.");}else{T=pt;B=pb;if(tw_optimize(items,n,T,B,&plan)){has=1;if(n<=22&&tw_bruteforce(items,n,T,B,&brute)&&brute.rating!=plan.rating)strcpy(status,"Warning: DP and brute-force results differ.");else strcpy(status,"Optimal selection calculated.");}else strcpy(status,"Invalid limits, data, or memory cap exceeded.");}}
+ BeginDrawing();ClearBackground(BG);DrawRectangle(0,0,W,118,NAVY);label("TRIPWISE",40,25,34,WHITE);label("Tourist Attraction Planner  /  Two-Constraint 0/1 Knapsack",42,72,19,(Color){203,218,235,255});label("DAA MINI PROJECT",1050,43,16,(Color){203,218,235,255});
+ panel((Rectangle){32,142,1216,294});label("1. ATTRACTION DETAILS",55,160,23,NAVY);label("Add places with their visit duration, entry cost and rating.",55,190,17,MUTED);
+ field((Rectangle){40,235,220,54},"Attraction name",namebuf,focus==0);field((Rectangle){285,235,150,54},"Duration (min)",dur,focus==1);field((Rectangle){460,235,170,54},"Entry cost (Rs)",cost,focus==2);field((Rectangle){655,235,170,54},"Rating points",rating,focus==3);
+ label("Click a field to edit. Press TAB to switch fields.",55,311,16,MUTED);
+ label("YOUR PLANNING LIMITS",55,344,19,NAVY);field((Rectangle){40,390,220,54},"Available time (minutes)",tbuf,focus==4);field((Rectangle){285,390,220,54},"Total budget (Rs)",bbuf,focus==5);
+ label(TextFormat("%d / %d attractions added",n,TW_MAX_ITEMS),555,408,19,INK);
+ panel((Rectangle){32,456,1216,222});label("2. ATTRACTION REGISTER",55,474,23,NAVY);label("ATTRACTION",60,518,15,MUTED);label("DURATION",500,518,15,MUTED);label("ENTRY COST",700,518,15,MUTED);label("RATING",930,518,15,MUTED);DrawLine(55,544,1225,544,LINE);
+ for(int i=0;i<n&&i<4;i++){int y=554+i*27;label(items[i].name,60,y,18,INK);label(TextFormat("%d min",items[i].duration),500,y,18,MUTED);label(TextFormat("Rs %d",items[i].cost),700,y,18,MUTED);label(TextFormat("%d pts",items[i].rating),930,y,18,MUTED);if(i<3)DrawLine(55,y+25,1225,y+25,(Color){235,240,245,255});}
+ if(n>4)label(TextFormat("Showing first 4 records  •  %d additional attractions",n-4),60,664,15,MUTED);
+ panel((Rectangle){32,700,1216,168});label("3. OPTIMIZED ITINERARY",55,718,23,NAVY);
+ if(has){DrawRectangleRounded((Rectangle){55,758,235,88},.12f,10,(Color){229,244,237,255});label("TOTAL RATING",72,770,14,GREEN);label(TextFormat("%d points",plan.rating),72,795,27,GREEN);
+ DrawRectangleRounded((Rectangle){305,758,235,88},.12f,10,PALE);label("TIME USED",322,770,14,BLUE);label(TextFormat("%d / %d min",plan.used_time,T),322,795,25,NAVY);
+ DrawRectangleRounded((Rectangle){555,758,235,88},.12f,10,(Color){250,241,224,255});label("BUDGET USED",572,770,14,AMBER);label(TextFormat("Rs %d / %d",plan.used_budget,B),572,795,24,AMBER);
+ label("SELECTED",830,765,14,MUTED);char selected[160]="";for(int i=0;i<plan.count;i++){const char*nm=items[plan.selected[i]].name;if(i)strcat(selected,", ");if(strlen(selected)+strlen(nm)<150)strcat(selected,nm);}label(selected[0]?selected:"No attractions selected",830,790,16,INK);
+ if(n<=22)label(TextFormat("Brute force validation: %s",brute.rating==plan.rating?"MATCH":"CHECK"),830,820,15,brute.rating==plan.rating?GREEN:AMBER);
+ }else{label("Your best attraction combination will appear here.",60,766,20,MUTED);label("Set your time and budget limits, then select Optimize plan.",60,802,17,MUTED);}
+ DrawRectangle(0,878,W,22,NAVY);label(status,42,879,14,WHITE);EndDrawing();}
 CloseWindow();return 0;}
