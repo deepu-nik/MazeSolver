@@ -1,0 +1,17 @@
+name: C algorithm tests
+on:
+  push:
+    branches: ["main", "feat/messmate-tripwise-gui"]
+  pull_request:
+    branches: ["main"]
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        project: [MessMate, TripWise]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile and run C algorithm tests
+        working-directory: ${{ matrix.project }}
+        run: make test
